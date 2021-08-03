@@ -61,7 +61,7 @@ updateModel=async (id)=>{
 updateHandler=async(e)=>{
   e.preventDefault();
   const colorFormData={
-    email:his.props.auth0.user.email,
+    email:this.props.auth0.user.email,
     colorName:e.target.colorName,
     colorImage:e.target.colorImage
   }
