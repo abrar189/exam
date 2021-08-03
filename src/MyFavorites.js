@@ -11,7 +11,10 @@ class MyFavorites extends React.Component {
     super(props)
 
     this.state = {
-      profileData: []
+      profileData: [],
+      profile:{},
+      showUpdateModel:false,
+      id:''
     }
   }
 
@@ -42,6 +45,45 @@ class MyFavorites extends React.Component {
   }
 
 
+updateModel=async (id)=>{
+  this.setState({
+    showUpdateModel:true,
+    id:id,
+    profile:this.state.profileData.find(items=>{
+      return items._id.toString() === id
+    })
+  })
+}
+
+
+
+
+updateHandler=async(e)=>{
+  e.preventDefault();
+  const colorFormData={
+    email:his.props.auth0.user.email,
+    colorName:e.target.colorName,
+    colorImage:e.target.colorImage
+  }
+
+  try{
+    let server = process.env.REACT_APP_SERVER;
+    const colorData=await axios.put(`${server}/${this.state.id}`,colorFormData)
+    this.setState({
+      profileData:colorData.color
+    })
+
+  }catch(error){
+    console.error(error)
+  }
+
+}
+
+
+
+
+
+
   render() {
     return (
       <>
@@ -57,6 +99,8 @@ class MyFavorites extends React.Component {
                 <Card.Img variant="top" src={element.image} />
                 <Card.Body>
                   <Card.Title>{element.name}</Card.Title>
+                  <Button onClick={() => { this.deleteHandler(index) }} variant="primary">update</Button>
+
 
                   <Button onClick={() => { this.deleteHandler(index) }} variant="primary">delete</Button>
                 </Card.Body>
