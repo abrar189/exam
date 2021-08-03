@@ -99,10 +99,10 @@ updateHandler=async(e)=>{
                 <Card.Img variant="top" src={element.image} />
                 <Card.Body>
                   <Card.Title>{element.name}</Card.Title>
-                  <Button onClick={() => { this.deleteHandler(index) }} variant="primary">update</Button>
+                  <Button onClick={() => { this.deleteHandler(element._id) }} variant="primary">update</Button>
 
 
-                  <Button onClick={() => { this.deleteHandler(index) }} variant="primary">delete</Button>
+                  <Button onClick={() => { this.deleteHandler(element._id) }} variant="primary">delete</Button>
                 </Card.Body>
               </Card>
             </div>
