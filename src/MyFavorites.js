@@ -3,87 +3,69 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './MyFavorites.css';
 import { withAuth0 } from '@auth0/auth0-react';
 import axios from 'axios';
-import Card from 'react-bootstrap/Card';
-import Button from 'react-bootstrap/Button'
+import CardFav from './components/CardFav';
+import UpdateModal from './components/UpdateModal';
+
 class MyFavorites extends React.Component {
 
   constructor(props) {
-    super(props)
-
+    super(props);
     this.state = {
-      profileData: [],
-      profile:{},
-      showUpdateModel:false,
-      id:''
+      coffee: [],
+      showModal:false,
+      index:0,
+      selectData:{},
     }
   }
-
-
-
-
-  // http://localhost:3001/?email=laithhayajneh98@gmail.com
+  // http://localhost:3007/dataDB?email=
   componentDidMount = async () => {
-    console.log('semmmmm', this.props.auth0.user.email)
-    let server = process.env.REACT_APP_SERVER;
-    console.log('seeerver', server)
-    let profileRead = await axios.get(`${server}/?email=${this.props.auth0.user.email}`);
-    console.log('profile read', profileRead)
-    await this.setState({
-      profileData: profileRead.data
-    })
-    console.log('this is profile data', this.state.profileData)
-  }
-
-
-
-  deleteHandler = async (id) => {
-    let server = process.env.REACT_APP_SERVER;
-    const colorData = await axios.delete(`${server}/${id}?email=${this.props.auth0.user.email}`);
+    let email = this.props.auth0.user.email;
+    let result = await axios.get(`${process.env.REACT_APP_SERVER}/dataDB?email=${email}`);
     this.setState({
-      profileData: colorData.data
+      coffee: result.data
     })
   }
 
+  // http://localhost:3007/delete/idx?email=
+  deleteFun =async(index)=>{
+    let email = this.props.auth0.user.email;
+    let result = await axios.delete(`${process.env.REACT_APP_SERVER}/delete/${index}?email=${email}`);
+    this.setState({
+      coffee: result.data
+    })
+  }
 
-updateModel=async (id)=>{
+  handleClose=()=>{
+    this.setState({
+      showModal:false,
+    })
+  }
+
+  updateFun =async(e)=>{
+    e.preventDefault();
+    const ObjData = {
+      email: this.props.auth0.user.email,
+      strDrink:e.target.strDrink.value,
+      strDrinkThumb:e.target.strDrinkThumb.value,
+      idDrink:e.target.idDrink.value,
+  }
+  let result = await axios.put(`${process.env.REACT_APP_SERVER}/update/${this.state.index}`,ObjData);
+    this.setState({
+      coffee: result.data
+    })
+}
+
+showModal=async(index)=>{
   this.setState({
-    showUpdateModel:true,
-    id:id,
-    profile:this.state.profileData.find(items=>{
-      return items._id.toString() === id
-    })
-  })
+    showModal:true,
+    index:index,
+   selectData : {
+    strDrink:this.state.coffee[index].strDrink,
+    strDrinkThumb:this.state.coffee[index].strDrinkThumb,
+    idDrink:this.state.coffee[index].idDrink,
 }
-
-
-
-
-updateHandler=async(e)=>{
-  e.preventDefault();
-  const colorFormData={
-    email:this.props.auth0.user.email,
-    colorName:e.target.colorName,
-    colorImage:e.target.colorImage
-  }
-
-  try{
-    let server = process.env.REACT_APP_SERVER;
-    const colorData=await axios.put(`${server}/${this.state.id}`,colorFormData)
-    this.setState({
-      profileData:colorData.color
-    })
-
-  }catch(error){
-    console.error(error)
-  }
-
+})
 }
-
-
-
-
-
-
   render() {
     return (
       <>
@@ -92,24 +74,9 @@ updateHandler=async(e)=>{
           This is a collection of my favorites
         </p>
 
-        {this.state.profileData.map((element, index) => {
-          return (
-            <div key={index} className="laith">
-              <Card style={{ width: '18rem' }}>
-                <Card.Img variant="top" src={element.image} />
-                <Card.Body>
-                  <Card.Title>{element.name}</Card.Title>
-                  <Button onClick={() => { this.deleteHandler(element._id) }} variant="primary">update</Button>
-
-
-                  <Button onClick={() => { this.deleteHandler(element._id) }} variant="primary">delete</Button>
-                </Card.Body>
-              </Card>
-            </div>
-
-          )
-        })}
-
+        <CardFav coffee={this.state.coffee} deleteFun={this.deleteFun} showModal={this.showModal} />
+        <UpdateModal updateFun={this.updateFun} handleClose={this.handleClose} showModal={this.state.showModal} 
+        selectData={this.state.selectData}/>
       </>
     )
   }
